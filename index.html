@@ -1,0 +1,1849 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KKN 224 JAYANTARA - Desa Mekarjaya, Cianjur (2026)</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Syne:wght@500;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'brand-dark': '#112a1f',
+                        'brand-deep': '#1b4332',
+                        'brand-green': '#2d6a4f',
+                        'brand-mint': '#52b788',
+                        'brand-sage': '#95d5b2',
+                        'brand-light': '#d8f3dc',
+                        'brand-cream': '#fbfbdf',
+                        'brand-peach': '#faedcd',
+                        'brand-pink': '#f8edeb',
+                        'brand-accent': '#e9c46a'
+                    },
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        heading: ['Syne', 'sans-serif'],
+                        serif: ['"Playfair Display"', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- React, ReactDOM, Babel, and Icons -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <style>
+        body {
+            background-color: #f6f8f5;
+            color: #112a1f;
+            overflow-x: hidden;
+        }
+        .scrapbook-border {
+            border: 2px dashed #95d5b2;
+        }
+        .paper-texture {
+            background-image: radial-gradient(#2d6a4f 0.5px, transparent 0.5px);
+            background-size: 16px 16px;
+            background-color: #fafbf8;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #eaf4ed;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #52b788;
+            border-radius: 4px;
+        }
+        .badge-pill {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useMemo, useRef } = React;
+
+        // Supported file types validation
+        const ALLOWED_MIME_TYPES = {
+            image: ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml'],
+            video: ['video/mp4', 'video/webm', 'video/quicktime'],
+            document: [
+                'application/pdf',
+                'application/msword',
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                'application/vnd.ms-excel',
+                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'application/vnd.ms-powerpoint',
+                'application/vnd.openxmlformats-officedocument.presentationml.slideshow',
+                'text/plain',
+                'text/csv'
+            ]
+        };
+
+        const BLOCKED_EXTENSIONS = ['exe', 'bat', 'cmd', 'sh', 'apk', 'msi', 'vbs', 'js'];
+
+        // Initial Seed Data for local DB state initialization
+        const INITIAL_MEMBERS = [
+            { id: 'm1', name: 'Muhammad Fasya', position: 'Ketua Kelompok (Kordes)', division: 'Inti', bio: 'Mahasiswa Teknik Informatika UIN SGD Bandung', photo: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500&q=80', social: '@fasya_224', attachments: [] },
+            { id: 'm2', name: 'Nabila Putri', position: 'Sekretaris 1', division: 'Administrasi', bio: 'Mahasiswi Hukum Keluarga Islam', photo: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=500&q=80', social: '@nabilaptr', attachments: [] },
+            { id: 'm3', name: 'Rizky Ramadhan', position: 'Bendahara 1', division: 'Keuangan', bio: 'Mahasiswa Manajemen Keuangan Syariah', photo: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500&q=80', social: '@rizky_rm', attachments: [] },
+            { id: 'm4', name: 'Siti Sarah', position: 'Koordinator Humas', division: 'Humas & Publikasi', bio: 'Mahasiswi Komunikasi Penyiaran Islam', photo: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=500&q=80', social: '@sitisarah_3', attachments: [] },
+            { id: 'm5', name: 'Ahmad Fauzi', position: 'Koor Acara & Logistik', division: 'Acara', bio: 'Mahasiswa Sosiologi Agama', photo: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=500&q=80', social: '@fauziahmad', attachments: [] }
+        ];
+
+        const INITIAL_CYCLES = [
+            { id: 'c1', number: 1, title: 'Siklus I — Sosialisasi, Rembug & Refleksi', description: 'Pengenalan awal kelompok KKN dengan perangkat Desa Mekarjaya, tokoh masyarakat, serta pemetaan isu lingkungan & ekotheologi.', date: '2026-07-25', location: 'Balai Desa Mekarjaya', output: 'Dokumen Pemetaan Awal Masalah & Berita Acara Sosialisasi', cover: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?w=800&q=80', attachments: [] },
+            { id: 'c2', number: 2, title: 'Siklus II — Pemetaan & Pengorganisasian', description: 'Pelaksanaan transect walk, wawancara mendalam warga, dan penyusunan peta potensi ekologi serta kelompok dampingan.', date: '2026-08-01', location: 'Dusun 1 & Dusun 2 Desa Mekarjaya', output: 'Peta Potensi Desa & Pembentukan Kelompok Eco-Enzyme', cover: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=800&q=80', attachments: [] },
+            { id: 'c3', number: 3, title: 'Siklus III — Perencanaan & Sinergi', description: 'Lokakarya desa untuk mematangkan program Rocket Stove, Eco Print, serta pendampingan UMKM bersama mitra lokal.', date: '2026-08-10', location: 'Aula Madrasah Al-Hidayah', output: 'Rencana Aksi Program Kerja Terpadu KKN 224', cover: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=800&q=80', attachments: [] },
+            { id: 'c4', number: 4, title: 'Siklus IV — Pelaksanaan & Monev', description: 'Eksekusi serentak seluruh program kerja unggulan, evaluasi dampak ekotheologi, serta penyerahan kenang-kenangan.', date: '2026-08-20', location: 'Seluruh Wilayah Desa Mekarjaya', output: 'Laporan Akhir KKN & Modul Panduan Ekotheologi Desa', cover: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&q=80', attachments: [] }
+        ];
+
+        const INITIAL_PROGRAMS = [
+            { id: 'p1', title: 'Rocket Stove Hemat Energi', category: 'Lingkungan & Ekologi', description: 'Inovasi kompor ramah lingkungan memanfaatkan limbah kayu dengan efisiensi pembakaran tinggi untuk warga desa.', objective: 'Mengurangi konsumsi kayu bakar dan emisi asap pemukiman.', target: 'Warga Dusun 2 Mekarjaya', date: '2026-08-05', location: 'RT 03 / RW 01', result: 'Terbuat 10 unit Rocket Stove yang langsung difungsikan oleh warga.', cover: 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800&q=80', attachments: [] },
+            { id: 'p2', title: 'Pembuatan Eco-Enzyme Organik', category: 'Pengolahan Sampah', description: 'Pemanfaatan sampah kulit buah dan sayuran menjadi cairan pembersih dan pupuk alami serbaguna.', objective: 'Mengurangi sampah organik rumah tangga skala desa.', target: 'Ibu-ibu PKK Desa Mekarjaya', date: '2026-08-08', location: 'Posko KKN 224', result: 'Diproduksi 50 Liter Eco-Enzyme masa fermentasi.', cover: 'https://images.unsplash.com/photo-1584473457406-6df376d53de8?w=800&q=80', attachments: [] },
+            { id: 'p3', title: 'Pelatihan Eco Print Batik Alami', category: 'Ekonomi Kreatif', description: 'Pemberdayaan seni kain dengan cetak daun-daunan lokal sebagai produk UMKM desa berkearifan ekologi.', objective: 'Menciptakan nilai tambah ekonomi berbasis flora sekitar.', target: 'Kelompok Pemuda & Karang Taruna', date: '2026-08-12', location: 'Saung Kelompok Tani', result: 'Menghasilkan 25 syal & kain bermotif daun jati & jarak.', cover: 'https://images.unsplash.com/photo-1606744888344-493238951221?w=800&q=80', attachments: [] },
+            { id: 'p4', title: 'Edukasi Stop Bullying & Character Building', category: 'Pendidikan', description: 'Penyuluhan anti-perundungan dan pembentukan karakter akhlakul karimah anak-anak sekolah dasar.', objective: 'Meningkatkan kesadaran empati dan kerukunan antar siswa.', target: 'Siswa SD Negeri Mekarjaya 1', date: '2026-08-14', location: 'SDN Mekarjaya 1', result: 'Diikuti oleh 120 siswa dengan deklarasi sekolah ramah anak.', cover: 'https://images.unsplash.com/photo-1577896851231-70ef18881754?w=800&q=80', attachments: [] },
+            { id: 'p5', title: 'Edukasi Literasi Gadget Sehat', category: 'Teknologi & Anak', description: 'Sosialisasi pemanfaatan smartphone secara bijak dan bahaya kecanduan game online bagi anak.', objective: 'Memberikan wawasan manajemen waktu layar (screen time).', target: 'Orang tua dan Anak-anak Dusun 1', date: '2026-08-15', location: 'MDTA Al-Falah', result: 'Tersusunnya kesepakatan Jam Belajar Tanpa HP pukul 18.30-20.00.', cover: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?w=800&q=80', attachments: [] },
+            { id: 'p6', title: 'Pendampingan NPWP & NIB UMKM', category: 'Legalitas & Usaha', description: 'Layanan asistensi pembuatan NIB (Nomor Induk Berusaha) dan NPWP gratis bagi pelaku usaha kecil.', objective: 'Membantu legalitas formal usaha masyarakat desa.', target: '30 Pelaku UMKM Keripik & Konveksi', date: '2026-08-16', location: 'Balai Desa Mekarjaya', result: 'Terbit 22 NIB secara langsung lewat Online Single Submission (OSS).', cover: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&q=80', attachments: [] },
+            { id: 'p7', title: 'Wakaf Al-Qur’an & Iqra Rahmatan Lil ‘Alamin', category: 'Keagamaan', description: 'Penyaluran mushaf Al-Qur\'an baru dan buku Iqra ke masjid & majelis taklim terpencil.', objective: 'Memfasilitasi sarana belajar mengaji anak-anak desa.', target: '5 Majelis Taklim & TPQ', date: '2026-08-18', location: 'Masjid Jami At-Taqwa', result: 'Disalurkan 60 Mushaf Al-Qur\'an & 100 Buku Iqra.', cover: 'https://images.unsplash.com/photo-1609599006353-e529ee54549a?w=800&q=80', attachments: [] },
+            { id: 'p8', title: 'Kegiatan Mengajar & Bimbingan Belajar', category: 'Pendidikan', description: 'Bimbel sore gratis matematika, bahasa inggris, dan tajwid untuk anak-anak sekolah dasar.', objective: 'Meningkatkan capaian akademis dan keagamaan siswa.', target: 'Anak-anak RW 01 - RW 04', date: '2026-08-01', location: 'Posko KKN 224', result: 'Terlaksana rutin 4x seminggu diikuti 45 santri/siswa.', cover: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800&q=80', attachments: [] }
+        ];
+
+        const INITIAL_NEWS = [
+            { id: 'n1', title: 'KKN 224 UIN SGD Bandung Resmi Diterima Oleh Perangkat Desa Mekarjaya Cianjur', summary: 'Penerimaan hangat dari Kepala Desa dan jajaran instansi Kecamatan Sukaluyu mengawali masa pengabdian 35 hari.', description: 'Kedatangan 15 mahasiswa KKN SISDAMAS Kelompok 224 Jayantara disambut penuh antusiasme oleh Perangkat Desa Mekarjaya. Dalam sambutannya, Kordes KKN 224 menegaskan komitmen membawa program ekotheologi ramah lingkungan yang solutif.', source: 'Tim Humas Jayantara', category: 'Berita Utama', date: '2026-07-26', thumbnail: 'https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?w=800&q=80', attachments: [] },
+            { id: 'n2', title: 'Solusi Sampah Rumah Tangga: Mahasiswa KKN 224 Latih Ibu PKK Buat Eco-Enzyme', summary: 'Pelatihan pengolahan limbah dapur menjadi cairan sejuta manfaat sukses digelar di Saung Warga.', description: 'Ibu-ibu Desa Mekarjaya kini memiliki ketrampilan mengolah sampah buah dan sayur menjadi cairan pembersih alami. Program ini merupakan perwujudan tema Ekotheologi Rahmatan Lil Alamin dalam menjaga kelestarian alam.', source: 'Desa News Cianjur', category: 'Lingkungan', date: '2026-08-09', thumbnail: 'https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=800&q=80', attachments: [] }
+        ];
+
+        const INITIAL_VIDEOS = [
+            { id: 'v1', title: 'Profile Official KKN Kelompok 224 Jayantara 2026', description: 'Video dokumenter pengenalan anggota, wilayah pengabdian Desa Mekarjaya, dan visi ekotheologi.', category: 'Dokumenter', thumbnail: 'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=800&q=80', videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', videoType: 'youtube', date: '2026-07-28', caption: 'Dokumenter Resmi 2026', attachments: [] },
+            { id: 'v2', title: 'Tutorial Pembuatan Rocket Stove Hemat Kayu', description: 'Panduan langkah demi langkah memfabrikasi kompor ramah lingkungan murah dan efisien.', category: 'Tutorial', thumbnail: 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=800&q=80', videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', videoType: 'youtube', date: '2026-08-06', caption: 'Inovasi Kompor Hemat Energi', attachments: [] }
+        ];
+
+        const INITIAL_ARTICLES = [
+            { id: 'a1', title: 'Implementasi Konsep Ekotheologi Rahmatan Lil ‘Alamin dalam Pengelolaan Sampah Perdesaan', author: 'Muhammad Fasya & Tim KKN 224', category: 'Jurnal / Prosiding', abstract: 'Kajian ini membahas bagaimana integrasi nilai spiritualitas Islam dan aksi nyata pengelolaan sampah berbasis Eco-Enzyme dapat meningkatkan kepedulian ekologis masyarakat Desa Mekarjaya Cianjur.', content: 'Pendahuluan:\nEkotheologi meletakkan dasar bahwa manusia adalah khalifah di bumi yang bertugas merawat alam raya...\n\nMetode:\nPendekatan SISDAMAS (Sistem Pemberdayaan Masyarakat) digunakan melalui 4 siklus utama...', date: '2026-08-22', thumbnail: 'https://images.unsplash.com/photo-1455390582262-044cdead277a?w=800&q=80', attachments: [] }
+        ];
+
+        const INITIAL_GALLERY = [
+            { id: 'g1', title: 'Foto Bersama Perangkat Desa Mekarjaya', caption: 'Acara pembukaan KKN 224 di Balai Desa', category: 'Sosialisasi', date: '2026-07-26', location: 'Balai Desa Mekarjaya', url: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&q=80', mediaType: 'image', attachments: [] },
+            { id: 'g2', title: 'Praktek Pembuatan Eco Print', caption: 'Peserta antusias menata daun di atas media kain mori', category: 'Program Kerja', date: '2026-08-12', location: 'Saung Warga', url: 'https://images.unsplash.com/photo-1513151233558-d860c5398176?w=800&q=80', mediaType: 'image', attachments: [] },
+            { id: 'g3', title: 'Pengajaran Bimbel Sore Dusun 1', caption: 'Adik-adik belajar matematika dasar penuh keceriaan', category: 'Pendidikan', date: '2026-08-04', location: 'Posko KKN', url: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?w=800&q=80', mediaType: 'image', attachments: [] }
+        ];
+
+        const INITIAL_LOGBOOK = [
+            { id: 'l1', day: 1, date: '2026-07-25', activity: 'Penerimaan & Silaturahmi Perdana', location: 'Posko & Rumah Kades', description: 'Tiba di lokasi KKN Desa Mekarjaya, melakukan penataan posko dan silaturahmi awal dengan Kepala Desa Mekarjaya.', attachments: [] },
+            { id: 'l2', day: 2, date: '2026-07-26', activity: 'Acara Pembukaan Resmi KKN 224', location: 'Aula Desa Mekarjaya', description: 'Menghadiri serah terima mahasiswa dari DPL kepada pihak Kecamatan dan Desa, dilanjutkan ramah tamah.', attachments: [] }
+        ];
+
+        const INITIAL_DOCUMENTS = [
+            { id: 'd1', title: 'Laporan Awal Pemetaan Sosial Desa Mekarjaya.pdf', description: 'Dokumen riset awal potensi dan masalah ekologi desa', category: 'Laporan', fileName: 'Laporan_Awal_Mekarjaya.pdf', fileType: 'application/pdf', fileSize: '2.4 MB', fileUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', date: '2026-07-30', uploadedBy: 'Nabila Putri' },
+            { id: 'd2', title: 'Data UMKM Desa Mekarjaya NIB 2026.xlsx', description: 'Rekapitulasi 22 pendaftar NIB hasil pendampingan KKN 224', category: 'Data & Form', fileName: 'Data_UMKM_NIB.xlsx', fileType: 'application/vnd.ms-excel', fileSize: '450 KB', fileUrl: '#', date: '2026-08-17', uploadedBy: 'Rizky Ramadhan' }
+        ];
+
+        // Generate Attendance Data for 35 Days automatically for all members
+        const generateInitialAttendance = (membersList) => {
+            const att = {};
+            membersList.forEach(m => {
+                att[m.id] = {};
+                for (let day = 1; day <= 35; day++) {
+                    // Default mostly Hadir for demo
+                    att[m.id][`day_${day}`] = day % 7 === 0 ? 'Izin' : 'Hadir';
+                }
+            });
+            return att;
+        };
+
+        // Main App Component
+        function App() {
+            const [activeTab, setActiveTab] = useState('beranda');
+            const [contributorName, setContributorName] = useState('Fasya');
+            
+            // Database State (Initialized with LocalStorage persistent sync)
+            const [members, setMembers] = useState(() => {
+                const saved = localStorage.getItem('kkn224_members');
+                return saved ? JSON.parse(saved) : INITIAL_MEMBERS;
+            });
+
+            const [cycles, setCycles] = useState(() => {
+                const saved = localStorage.getItem('kkn224_cycles');
+                return saved ? JSON.parse(saved) : INITIAL_CYCLES;
+            });
+
+            const [programs, setPrograms] = useState(() => {
+                const saved = localStorage.getItem('kkn224_programs');
+                return saved ? JSON.parse(saved) : INITIAL_PROGRAMS;
+            });
+
+            const [activities, setActivities] = useState(() => {
+                const saved = localStorage.getItem('kkn224_activities');
+                return saved ? JSON.parse(saved) : [
+                    { id: 'act1', week: 1, title: 'Silaturahmi & Pemetaan Awal Wilayah', date: '2026-07-27', location: 'Dusun 1 & 2', description: 'Survei lokasi, wawancara tokoh adat, dan pengumpulan data statistik dasar.', attachments: [] },
+                    { id: 'act2', week: 2, title: 'Pelaksanaan Program Eco-Enzyme & Bimbel', date: '2026-08-03', location: 'Posko & Saung Tani', description: 'Praktek pembuatan pupuk fermentasi dan asistensi mengajar anak sekolah.', attachments: [] }
+                ];
+            });
+
+            const [news, setNews] = useState(() => {
+                const saved = localStorage.getItem('kkn224_news');
+                return saved ? JSON.parse(saved) : INITIAL_NEWS;
+            });
+
+            const [videos, setVideos] = useState(() => {
+                const saved = localStorage.getItem('kkn224_videos');
+                return saved ? JSON.parse(saved) : INITIAL_VIDEOS;
+            });
+
+            const [articles, setArticles] = useState(() => {
+                const saved = localStorage.getItem('kkn224_articles');
+                return saved ? JSON.parse(saved) : INITIAL_ARTICLES;
+            });
+
+            const [gallery, setGallery] = useState(() => {
+                const saved = localStorage.getItem('kkn224_gallery');
+                return saved ? JSON.parse(saved) : INITIAL_GALLERY;
+            });
+
+            const [logbook, setLogbook] = useState(() => {
+                const saved = localStorage.getItem('kkn224_logbook');
+                return saved ? JSON.parse(saved) : INITIAL_LOGBOOK;
+            });
+
+            const [documents, setDocuments] = useState(() => {
+                const saved = localStorage.getItem('kkn224_documents');
+                return saved ? JSON.parse(saved) : INITIAL_DOCUMENTS;
+            });
+
+            const [attendance, setAttendance] = useState(() => {
+                const saved = localStorage.getItem('kkn224_attendance');
+                return saved ? JSON.parse(saved) : generateInitialAttendance(INITIAL_MEMBERS);
+            });
+
+            const [revisions, setRevisions] = useState(() => {
+                const saved = localStorage.getItem('kkn224_revisions');
+                return saved ? JSON.parse(saved) : [
+                    { id: 'r1', timestamp: new Date().toISOString(), user: 'Fasya', action: 'Inisialisasi Sistem Database KKN 224 Jayantara' }
+                ];
+            });
+
+            // Editable Homepage Content
+            const [heroContent, setHeroContent] = useState(() => {
+                const saved = localStorage.getItem('kkn224_hero');
+                return saved ? JSON.parse(saved) : {
+                    heroTitle: 'KKN SISDAMAS KELOMPOK 224 JAYANTARA',
+                    heroSubtitle: 'Desa Mekarjaya, Kecamatan Sukaluyu, Kabupaten Cianjur',
+                    heroTheme: '“Membumikan Ekotheologi Berbasis Rahmatan Lil ‘Alamin”',
+                    heroDescription: 'Mengabdi bersama masyarakat dalam semangat pelestarian lingkungan, pemberdayaan ekonomi ramah ekologi, serta penguatan nilai-nilai keislaman universal.',
+                    heroImage: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=1200&q=80',
+                    closingTitle: 'And Then, We Went Home.',
+                    closingText: 'Kami datang membawa pengetahuan, tetapi pulang membawa lebih banyak pelajaran. Sebab pada akhirnya, pengabdian bukan hanya tentang apa yang kami berikan kepada masyarakat, tetapi juga tentang apa yang masyarakat ajarkan kepada kami.'
+                };
+            });
+
+            // UI Modals State
+            const [editingItem, setEditingItem] = useState(null); // { type, data }
+            const [isContributeOpen, setIsContributeOpen] = useState(false);
+            const [searchQuery, setSearchQuery] = useState('');
+            const [isSearchOpen, setIsSearchOpen] = useState(false);
+            const [notification, setNotification] = useState(null);
+
+            // Sync Member changes with Attendance Database
+            useEffect(() => {
+                setAttendance(prev => {
+                    const updated = { ...prev };
+                    members.forEach(m => {
+                        if (!updated[m.id]) {
+                            updated[m.id] = {};
+                            for (let day = 1; day <= 35; day++) {
+                                updated[m.id][`day_${day}`] = 'Hadir';
+                            }
+                        }
+                    });
+                    return updated;
+                });
+            }, [members]);
+
+            // Save state to LocalStorage automatically
+            useEffect(() => { localStorage.setItem('kkn224_members', JSON.stringify(members)); }, [members]);
+            useEffect(() => { localStorage.setItem('kkn224_cycles', JSON.stringify(cycles)); }, [cycles]);
+            useEffect(() => { localStorage.setItem('kkn224_programs', JSON.stringify(programs)); }, [programs]);
+            useEffect(() => { localStorage.setItem('kkn224_activities', JSON.stringify(activities)); }, [activities]);
+            useEffect(() => { localStorage.setItem('kkn224_news', JSON.stringify(news)); }, [news]);
+            useEffect(() => { localStorage.setItem('kkn224_videos', JSON.stringify(videos)); }, [videos]);
+            useEffect(() => { localStorage.setItem('kkn224_articles', JSON.stringify(articles)); }, [articles]);
+            useEffect(() => { localStorage.setItem('kkn224_gallery', JSON.stringify(gallery)); }, [gallery]);
+            useEffect(() => { localStorage.setItem('kkn224_logbook', JSON.stringify(logbook)); }, [logbook]);
+            useEffect(() => { localStorage.setItem('kkn224_documents', JSON.stringify(documents)); }, [documents]);
+            useEffect(() => { localStorage.setItem('kkn224_attendance', JSON.stringify(attendance)); }, [attendance]);
+            useEffect(() => { localStorage.setItem('kkn224_hero', JSON.stringify(heroContent)); }, [heroContent]);
+            useEffect(() => { localStorage.setItem('kkn224_revisions', JSON.stringify(revisions)); }, [revisions]);
+
+            // Toast notification helper
+            const showToast = (message, type = 'success') => {
+                setNotification({ message, type });
+                setTimeout(() => setNotification(null), 3500);
+            };
+
+            // Audit log helper
+            const logRevision = (action) => {
+                const entry = {
+                    id: 'rev_' + Date.now(),
+                    timestamp: new Date().toLocaleString('id-ID'),
+                    user: contributorName || 'Kontributor',
+                    action
+                };
+                setRevisions(prev => [entry, ...prev.slice(0, 49)]);
+            };
+
+            // Dynamic Stats derived directly from Database
+            const stats = useMemo(() => ({
+                totalMembers: members.length,
+                totalCycles: cycles.length,
+                totalPrograms: programs.length,
+                totalNews: news.length,
+                totalArticles: articles.length,
+                totalGallery: gallery.length,
+                totalDocuments: documents.length,
+                attendanceDays: 35
+            }), [members, cycles, programs, news, articles, gallery, documents]);
+
+            // Universal Media Upload Helper Component (Option A: Upload File & Option B: Add URL)
+            const UniversalMediaUploader = ({ onMediaAdded, label = "Tambah Media / Lampiran" }) => {
+                const [mode, setMode] = useState('upload'); // 'upload' | 'url'
+                const [dragOver, setDragOver] = useState(false);
+                const [uploadProgress, setUploadProgress] = useState(0);
+                const [isUploading, setIsUploading] = useState(false);
+                
+                // Form URL input
+                const [urlInput, setUrlInput] = useState('');
+                const [titleInput, setTitleInput] = useState('');
+                const [typeInput, setTypeInput] = useState('image');
+
+                const handleFiles = (fileList) => {
+                    const files = Array.from(fileList);
+                    if (files.length === 0) return;
+
+                    setIsUploading(true);
+                    setUploadProgress(10);
+
+                    // Validate dangerous files
+                    const invalidFile = files.find(f => {
+                        const ext = f.name.split('.').pop().toLowerCase();
+                        return BLOCKED_EXTENSIONS.includes(ext);
+                    });
+
+                    if (invalidFile) {
+                        showToast(`File ${invalidFile.name} diblokir demi keamanan!`, 'error');
+                        setIsUploading(false);
+                        return;
+                    }
+
+                    // Simulate step upload progress
+                    let prg = 20;
+                    const interval = setInterval(() => {
+                        prg += 25;
+                        setUploadProgress(prg);
+                        if (prg >= 100) {
+                            clearInterval(interval);
+                            setIsUploading(false);
+                            
+                            // Process valid files into persistent data URLs / Object URLs
+                            files.forEach(file => {
+                                const reader = new FileReader();
+                                reader.onload = (e) => {
+                                    const fileDataUrl = e.target.result;
+                                    let mediaCategory = 'document';
+                                    if (file.type.startsWith('image/')) mediaCategory = 'image';
+                                    else if (file.type.startsWith('video/')) mediaCategory = 'video';
+
+                                    const newAttachment = {
+                                        id: 'att_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+                                        title: file.name,
+                                        url: fileDataUrl,
+                                        fileType: file.type,
+                                        fileSize: (file.size / 1024 / 1024).toFixed(2) + ' MB',
+                                        mediaType: mediaCategory,
+                                        uploadedAt: new Date().toLocaleDateString('id-ID'),
+                                        uploadedBy: contributorName
+                                    };
+                                    onMediaAdded(newAttachment);
+                                };
+                                reader.readAsDataURL(file);
+                            });
+                            showToast(`Berhasil mengunggah ${files.length} file!`);
+                        }
+                    }, 200);
+                };
+
+                const handleUrlSubmit = (e) => {
+                    e.preventDefault();
+                    if (!urlInput.trim()) return;
+
+                    const newAttachment = {
+                        id: 'att_url_' + Date.now(),
+                        title: titleInput || 'Tautan Eksternal',
+                        url: urlInput,
+                        mediaType: typeInput,
+                        isExternalUrl: true,
+                        uploadedAt: new Date().toLocaleDateString('id-ID'),
+                        uploadedBy: contributorName
+                    };
+                    onMediaAdded(newAttachment);
+                    setUrlInput('');
+                    setTitleInput('');
+                    showToast('Tautan eksternal berhasil ditambahkan!');
+                };
+
+                return (
+                    <div className="bg-emerald-50/50 p-4 rounded-xl border border-emerald-200 my-3">
+                        <div className="flex items-center justify-between mb-3">
+                            <span className="text-xs font-bold text-brand-deep uppercase tracking-wider">{label}</span>
+                            <div className="flex bg-white rounded-lg p-1 border text-xs font-medium">
+                                <button
+                                    type="button"
+                                    onClick={() => setMode('upload')}
+                                    className={`px-3 py-1 rounded-md transition ${mode === 'upload' ? 'bg-brand-green text-white font-bold' : 'text-gray-600 hover:text-brand-dark'}`}
+                                >
+                                    📁 Unggah File
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setMode('url')}
+                                    className={`px-3 py-1 rounded-md transition ${mode === 'url' ? 'bg-brand-green text-white font-bold' : 'text-gray-600 hover:text-brand-dark'}`}
+                                >
+                                    🔗 Tautan URL
+                                </button>
+                            </div>
+                        </div>
+
+                        {mode === 'upload' ? (
+                            <div>
+                                <div
+                                    onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+                                    onDragLeave={() => setDragOver(false)}
+                                    onDrop={(e) => {
+                                        e.preventDefault();
+                                        setDragOver(false);
+                                        handleFiles(e.dataTransfer.files);
+                                    }}
+                                    className={`border-2 border-dashed rounded-xl p-5 text-center transition cursor-pointer ${
+                                        dragOver ? 'border-brand-green bg-emerald-100/50' : 'border-emerald-300 bg-white hover:border-brand-mint'
+                                    }`}
+                                >
+                                    <input
+                                        type="file"
+                                        multiple
+                                        id="media-file-input"
+                                        className="hidden"
+                                        onChange={(e) => handleFiles(e.target.files)}
+                                    />
+                                    <label htmlFor="media-file-input" className="cursor-pointer block">
+                                        <div className="text-3xl mb-1">📤</div>
+                                        <p className="text-sm font-semibold text-brand-dark">Tarik & Lepas File di sini atau <span className="text-brand-green underline">Pilih File</span></p>
+                                        <p className="text-xs text-gray-500 mt-1">Mendukung Gambar (JPG, PNG, GIF), Video (MP4), Dokumen (PDF, DOCX, XLSX, PPTX, CSV, TXT)</p>
+                                    </label>
+                                </div>
+
+                                {isUploading && (
+                                    <div className="mt-3">
+                                        <div className="flex justify-between text-xs text-gray-600 mb-1">
+                                            <span>Mengunggah file...</span>
+                                            <span>{uploadProgress}%</span>
+                                        </div>
+                                        <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
+                                            <div className="bg-brand-mint h-full transition-all duration-300" style={{ width: `${uploadProgress}%` }}></div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        ) : (
+                            <form onSubmit={handleUrlSubmit} className="space-y-2 bg-white p-3 rounded-lg border">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                    <input
+                                        type="text"
+                                        placeholder="Judul / Keterangan Tautan"
+                                        value={titleInput}
+                                        onChange={(e) => setTitleInput(e.target.value)}
+                                        className="text-xs p-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-brand-green"
+                                    />
+                                    <select
+                                        value={typeInput}
+                                        onChange={(e) => setTypeInput(e.target.value)}
+                                        className="text-xs p-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-brand-green bg-white"
+                                    >
+                                        <option value="image">Gambar (Direct URL)</option>
+                                        <option value="video">Video (YouTube / TikTok / URL)</option>
+                                        <option value="document">Dokumen / Drive / Form</option>
+                                    </select>
+                                </div>
+                                <div className="flex gap-2">
+                                    <input
+                                        type="url"
+                                        required
+                                        placeholder="https://youtube.com/watch?... atau https://drive.google.com/..."
+                                        value={urlInput}
+                                        onChange={(e) => setUrlInput(e.target.value)}
+                                        className="flex-1 text-xs p-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-brand-green"
+                                    />
+                                    <button
+                                        type="submit"
+                                        className="bg-brand-green hover:bg-brand-deep text-white px-4 py-1.5 text-xs font-bold rounded-md transition"
+                                    >
+                                        + Tambah URL
+                                    </button>
+                                </div>
+                            </form>
+                        )}
+                    </div>
+                );
+            };
+
+            // Universal Attachment List Manager Component (View, Replace, Metadata Edit, Remove)
+            const UniversalAttachmentManager = ({ attachments = [], onUpdateAttachments }) => {
+                const [editingAttachmentId, setEditingAttachmentId] = useState(null);
+                const [metaTitle, setMetaTitle] = useState('');
+
+                const handleRemove = (id) => {
+                    if (confirm('Apakah kamu yakin ingin menghapus lampiran ini?')) {
+                        const updated = attachments.filter(a => a.id !== id);
+                        onUpdateAttachments(updated);
+                        showToast('Lampiran berhasil dihapus.');
+                    }
+                };
+
+                const handleReplaceFile = (id, newFile) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const updated = attachments.map(att => {
+                            if (att.id === id) {
+                                return {
+                                    ...att,
+                                    title: newFile.name,
+                                    url: e.target.result,
+                                    fileSize: (newFile.size / 1024 / 1024).toFixed(2) + ' MB'
+                                };
+                            }
+                            return att;
+                        });
+                        onUpdateAttachments(updated);
+                        showToast('File lampiran berhasil diganti!');
+                    };
+                    reader.readAsDataURL(newFile);
+                };
+
+                const handleSaveMeta = (id) => {
+                    const updated = attachments.map(att => att.id === id ? { ...att, title: metaTitle } : att);
+                    onUpdateAttachments(updated);
+                    setEditingAttachmentId(null);
+                    showToast('Judul lampiran diperbarui.');
+                };
+
+                if (!attachments || attachments.length === 0) {
+                    return <p className="text-xs text-gray-400 italic py-1">Belum ada lampiran file/URL tambahan.</p>;
+                }
+
+                return (
+                    <div className="space-y-2 my-2">
+                        {attachments.map((item) => (
+                            <div key={item.id} className="flex items-center justify-between bg-white p-2.5 rounded-lg border text-xs shadow-sm hover:border-emerald-300 transition">
+                                <div className="flex items-center gap-2 overflow-hidden pr-2">
+                                    <span className="text-base">
+                                        {item.mediaType === 'image' ? '🖼️' : item.mediaType === 'video' ? '🎥' : '📄'}
+                                    </span>
+                                    {editingAttachmentId === item.id ? (
+                                        <div className="flex items-center gap-1">
+                                            <input
+                                                type="text"
+                                                value={metaTitle}
+                                                onChange={(e) => setMetaTitle(e.target.value)}
+                                                className="border rounded px-1.5 py-0.5 text-xs"
+                                            />
+                                            <button onClick={() => handleSaveMeta(item.id)} className="bg-emerald-600 text-white px-2 py-0.5 rounded text-[10px]">Simpan</button>
+                                        </div>
+                                    ) : (
+                                        <div className="truncate">
+                                            <a href={item.url} target="_blank" rel="noreferrer" className="font-semibold text-brand-dark hover:text-brand-green hover:underline">
+                                                {item.title || 'Lampiran File'}
+                                            </a>
+                                            <p className="text-[10px] text-gray-400">
+                                                {item.fileSize ? `${item.fileSize} • ` : ''}Diunggah oleh {item.uploadedBy || 'Kontributor'}
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="flex items-center gap-1 shrink-0">
+                                    {/* Replace Button */}
+                                    <label className="cursor-pointer bg-gray-100 hover:bg-emerald-100 text-gray-700 hover:text-brand-green px-2 py-1 rounded text-[11px] font-medium transition">
+                                        🔄 Ganti File
+                                        <input
+                                            type="file"
+                                            className="hidden"
+                                            onChange={(e) => {
+                                                if (e.target.files[0]) handleReplaceFile(item.id, e.target.files[0]);
+                                            }}
+                                        />
+                                    </label>
+
+                                    {/* Edit Meta */}
+                                    <button
+                                        type="button"
+                                        onClick={() => { setEditingAttachmentId(item.id); setMetaTitle(item.title); }}
+                                        className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 py-1 rounded text-[11px]"
+                                    >
+                                        ✏️ Edit
+                                    </button>
+
+                                    {/* Delete */}
+                                    <button
+                                        type="button"
+                                        onClick={() => handleRemove(item.id)}
+                                        className="bg-red-50 hover:bg-red-100 text-red-600 px-2 py-1 rounded text-[11px]"
+                                    >
+                                        🗑️
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                );
+            };
+
+            // Universal Edit Modal Component (Handles all DB collections dynamic forms)
+            const UniversalEditModal = ({ item, type, onClose, onSave, onDelete }) => {
+                const [formData, setFormData] = useState({ ...item });
+
+                const handleChange = (field, value) => {
+                    setFormData(prev => ({ ...prev, [field]: value }));
+                };
+
+                const handleAttachmentAdded = (newAtt) => {
+                    const currentAtts = formData.attachments || [];
+                    setFormData(prev => ({ ...prev, attachments: [...currentAtts, newAtt] }));
+                };
+
+                const handleSubmit = (e) => {
+                    e.preventDefault();
+                    onSave(formData);
+                    onClose();
+                };
+
+                return (
+                    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+                        <div className="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-emerald-100 max-h-[90vh] overflow-y-auto custom-scrollbar">
+                            <div className="flex justify-between items-center mb-4 pb-3 border-b">
+                                <div>
+                                    <h3 className="text-xl font-heading font-bold text-brand-dark">
+                                        ✏️ Edit Data: <span className="text-brand-green">{type.toUpperCase()}</span>
+                                    </h3>
+                                    <p className="text-xs text-gray-500">Perubahan akan langsung disimpan ke database terpusat.</p>
+                                </div>
+                                <button onClick={onClose} className="text-gray-400 hover:text-red-500 text-xl font-bold">✕</button>
+                            </div>
+
+                            <form onSubmit={handleSubmit} className="space-y-4">
+                                {/* DYNAMIC FORM FIELDS BASED ON TYPE */}
+                                {type === 'hero' && (
+                                    <>
+                                        <div>
+                                            <label className="block text-xs font-bold text-gray-700 mb-1">Judul Utama Hero</label>
+                                            <input type="text" value={formData.heroTitle || ''} onChange={(e) => handleChange('heroTitle', e.target.value)} className="w-full text-sm p-2.5 border rounded-lg" required />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-bold text-gray-700 mb-1">Sub-Judul & Lokasi</label>
+                                            <input type="text" value={formData.heroSubtitle || ''} onChange={(e) => handleChange('heroSubtitle', e.target.value)} className="w-full text-sm p-2.5 border rounded-lg" required />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-bold text-gray-700 mb-1">Tema KKN</label>
+                                            <input type="text" value={formData.heroTheme || ''} onChange={(e) => handleChange('heroTheme', e.target.value)} className="w-full text-sm p-2.5 border rounded-lg" required />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-bold text-gray-700 mb-1">Deskripsi Narasi</label>
+                                            <textarea rows="3" value={formData.heroDescription || ''} onChange={(e) => handleChange('heroDescription', e.target.value)} className="w-full text-sm p-2.5 border rounded-lg"></textarea>
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-bold text-gray-700 mb-1">URL / File Gambar Hero Utama</label>
+                                            <input type="text" value={formData.heroImage || ''} onChange={(e) => handleChange('heroImage', e.target.value)} className="w-full text-sm p-2.5 border rounded-lg" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-bold text-gray-700 mb-1">Teks Penutup ("And Then, We Went Home")</label>
+                                            <textarea rows="3" value={formData.closingText || ''} onChange={(e) => handleChange('closingText', e.target.value)} className="w-full text-sm p-2.5 border rounded-lg"></textarea>
+                                        </div>
+                                    </>
+                                )}
+
+                                {type === 'member' && (
+                                    <>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                            <div>
+                                                <label className="block text-xs font-bold text-gray-700 mb-1">Nama Lengkap</label>
+                                                <input type="text" value={formData.name || ''} onChange={(e) => handleChange('name', e.target.value)} className="w-full text-sm p-2.5 border rounded-lg" required />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-bold text-gray-700 mb-1">Jabatan dalam Kelompok</label>
+                                                <input type="text" value={formData.position || ''} onChange={(e) => handleChange('position', e.target.value)} className="w-full text-sm p-2.5 border rounded-lg" required />
+                                            </div>
+                                        </div>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                            <div>
+                                                <label className="block text-xs font-bold text-gray-700 mb-1">Divisi</label>
+                                                <input type="text" value={formData.division || ''} onChange={(e) => handleChange('division', e.target.value)} className="w-full text-sm p-2.5 border rounded-lg" />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-bold text-gray-700 mb-1">Akun Sosmed (Instagram)</label>
+                                                <input type="text" value={formData.social || ''} onChange={(e) => handleChange('social', e.target.value)} className="w-full text-sm p-2.5 border rounded-lg" />
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-bold text-gray-700 mb-1">Biografi Singkat & Jurusan</label>
+                                            <textarea rows="2" value={formData.bio || ''} onChange={(e) => handleChange('bio', e.target.value)} className="w-full text-sm p-2.5 border rounded-lg"></textarea>
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-bold text-gray-700 mb-1">Foto Profil (URL / Upload)</label>
+                                            <input type="text" value={formData.photo || ''} onChange={(e) => handleChange('photo', e.target.value)} className="w-full text-sm p-2.5 border rounded-lg" />
+                                        </div>
+                                    </>
+                                )}
+
+                                {(type === 'cycle' || type === 'program' || type === 'news' || type === 'activity') && (
+                                    <>
+                                        <div>
+                                            <label className="block text-xs font-bold text-gray-700 mb-1">Judul / Nama Kegiatan</label>
+                                            <input type="text" value={formData.title || ''} onChange={(e) => handleChange('title', e.target.value)} className="w-full text-sm p-2.5 border rounded-lg" required />
+                                        </div>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                            <div>
+                                                <label className="block text-xs font-bold text-gray-700 mb-1">Tanggal</label>
+                                                <input type="date" value={formData.date || ''} onChange={(e) => handleChange('date', e.target.value)} className="w-full text-sm p-2.5 border rounded-lg" />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-bold text-gray-700 mb-1">Lokasi</label>
+                                                <input type="text" value={formData.location || ''} onChange={(e) => handleChange('location', e.target.value)} className="w-full text-sm p-2.5 border rounded-lg" />
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-bold text-gray-700 mb-1">Deskripsi Lengkap</label>
+                                            <textarea rows="4" value={formData.description || formData.summary || ''} onChange={(e) => handleChange(type === 'news' ? 'description' : 'description', e.target.value)} className="w-full text-sm p-2.5 border rounded-lg" required></textarea>
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-bold text-gray-700 mb-1">Sampul / Foto Utama (URL)</label>
+                                            <input type="text" value={formData.cover || formData.thumbnail || ''} onChange={(e) => handleChange(type === 'cycle' || type === 'program' ? 'cover' : 'thumbnail', e.target.value)} className="w-full text-sm p-2.5 border rounded-lg" />
+                                        </div>
+                                    </>
+                                )}
+
+                                {type === 'video' && (
+                                    <>
+                                        <div>
+                                            <label className="block text-xs font-bold text-gray-700 mb-1">Judul Video</label>
+                                            <input type="text" value={formData.title || ''} onChange={(e) => handleChange('title', e.target.value)} className="w-full text-sm p-2.5 border rounded-lg" required />
+                                        </div>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                            <div>
+                                                <label className="block text-xs font-bold text-gray-700 mb-1">Kategori</label>
+                                                <input type="text" value={formData.category || ''} onChange={(e) => handleChange('category', e.target.value)} className="w-full text-sm p-2.5 border rounded-lg" />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-bold text-gray-700 mb-1">Jenis Video</label>
+                                                <select value={formData.videoType || 'youtube'} onChange={(e) => handleChange('videoType', e.target.value)} className="w-full text-sm p-2.5 border rounded-lg bg-white">
+                                                    <option value="youtube">YouTube Embed</option>
+                                                    <option value="tiktok">TikTok</option>
+                                                    <option value="upload">Video File Direct Upload</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-bold text-gray-700 mb-1">URL Video / Embed Link</label>
+                                            <input type="text" value={formData.videoUrl || ''} onChange={(e) => handleChange('videoUrl', e.target.value)} className="w-full text-sm p-2.5 border rounded-lg" required />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-bold text-gray-700 mb-1">Deskripsi</label>
+                                            <textarea rows="2" value={formData.description || ''} onChange={(e) => handleChange('description', e.target.value)} className="w-full text-sm p-2.5 border rounded-lg"></textarea>
+                                        </div>
+                                    </>
+                                )}
+
+                                {type === 'article' && (
+                                    <>
+                                        <div>
+                                            <label className="block text-xs font-bold text-gray-700 mb-1">Judul Artikel / Prosiding</label>
+                                            <input type="text" value={formData.title || ''} onChange={(e) => handleChange('title', e.target.value)} className="w-full text-sm p-2.5 border rounded-lg" required />
+                                        </div>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                            <div>
+                                                <label className="block text-xs font-bold text-gray-700 mb-1">Penulis</label>
+                                                <input type="text" value={formData.author || ''} onChange={(e) => handleChange('author', e.target.value)} className="w-full text-sm p-2.5 border rounded-lg" required />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-bold text-gray-700 mb-1">Kategori</label>
+                                                <input type="text" value={formData.category || ''} onChange={(e) => handleChange('category', e.target.value)} className="w-full text-sm p-2.5 border rounded-lg" />
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-bold text-gray-700 mb-1">Abstrak Singkat</label>
+                                            <textarea rows="2" value={formData.abstract || ''} onChange={(e) => handleChange('abstract', e.target.value)} className="w-full text-sm p-2.5 border rounded-lg"></textarea>
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-bold text-gray-700 mb-1">Isi Artikel Lengkap</label>
+                                            <textarea rows="6" value={formData.content || ''} onChange={(e) => handleChange('content', e.target.value)} className="w-full text-sm p-2.5 border rounded-lg font-mono text-xs"></textarea>
+                                        </div>
+                                    </>
+                                )}
+
+                                {type === 'document' && (
+                                    <>
+                                        <div>
+                                            <label className="block text-xs font-bold text-gray-700 mb-1">Judul Dokumen</label>
+                                            <input type="text" value={formData.title || ''} onChange={(e) => handleChange('title', e.target.value)} className="w-full text-sm p-2.5 border rounded-lg" required />
+                                        </div>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                            <div>
+                                                <label className="block text-xs font-bold text-gray-700 mb-1">Kategori Dokumen</label>
+                                                <input type="text" value={formData.category || ''} onChange={(e) => handleChange('category', e.target.value)} className="w-full text-sm p-2.5 border rounded-lg" />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-bold text-gray-700 mb-1">Nama File Original</label>
+                                                <input type="text" value={formData.fileName || ''} onChange={(e) => handleChange('fileName', e.target.value)} className="w-full text-sm p-2.5 border rounded-lg" />
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-bold text-gray-700 mb-1">URL File Dokumen</label>
+                                            <input type="text" value={formData.fileUrl || ''} onChange={(e) => handleChange('fileUrl', e.target.value)} className="w-full text-sm p-2.5 border rounded-lg" required />
+                                        </div>
+                                    </>
+                                )}
+
+                                {/* UNIVERSAL ATTACHMENT MANAGER INSIDE EDIT MODAL */}
+                                {type !== 'hero' && (
+                                    <div className="border-t pt-4">
+                                        <label className="block text-xs font-bold text-brand-dark mb-1">📁 Kelola Lampiran Foto / Video / Dokumen Tambahan</label>
+                                        <UniversalMediaUploader onMediaAdded={handleAttachmentAdded} />
+                                        <UniversalAttachmentManager
+                                            attachments={formData.attachments || []}
+                                            onUpdateAttachments={(newAtts) => handleChange('attachments', newAtts)}
+                                        />
+                                    </div>
+                                )}
+
+                                <div className="flex items-center justify-between pt-4 border-t">
+                                    {onDelete && item.id ? (
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                if (confirm('Apakah kamu yakin ingin menghapus data ini dari database?')) {
+                                                    onDelete(item.id);
+                                                    onClose();
+                                                }
+                                            }}
+                                            className="bg-red-50 hover:bg-red-100 text-red-600 px-4 py-2 rounded-xl text-xs font-bold transition"
+                                        >
+                                            🗑️ Hapus Data
+                                        </button>
+                                    ) : <div></div>}
+
+                                    <div className="flex gap-2">
+                                        <button type="button" onClick={onClose} className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-xl text-xs font-bold transition">Batal</button>
+                                        <button type="submit" className="bg-brand-green hover:bg-brand-deep text-white px-5 py-2 rounded-xl text-xs font-bold transition shadow-md">💾 Simpan Perubahan</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                );
+            };
+
+            // Global Search Modal
+            const SearchModal = ({ onClose, query, setQuery, results }) => (
+                <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-start justify-center pt-20 p-4">
+                    <div className="bg-white rounded-2xl max-w-xl w-full p-5 shadow-2xl border border-emerald-100">
+                        <div className="flex justify-between items-center mb-3">
+                            <h4 className="font-heading font-bold text-brand-dark text-lg">🔍 Pencarian Database Terpusat</h4>
+                            <button onClick={onClose} className="text-gray-400 hover:text-red-500 font-bold">✕</button>
+                        </div>
+                        <input
+                            type="text"
+                            autoFocus
+                            placeholder="Cari program, berita, anggota, dokumen, logbook..."
+                            value={query}
+                            onChange={(e) => setQuery(e.target.value)}
+                            className="w-full text-sm p-3 border-2 border-brand-mint rounded-xl focus:outline-none mb-4"
+                        />
+                        <div className="max-h-80 overflow-y-auto space-y-2 custom-scrollbar">
+                            {results.length === 0 ? (
+                                <p className="text-xs text-center text-gray-400 py-6">Ketik kata kunci untuk mencari data di seluruh tabel KKN 224.</p>
+                            ) : (
+                                results.map((res, i) => (
+                                    <div key={i} onClick={() => { setActiveTab(res.tab); onClose(); }} className="p-3 bg-emerald-50/50 hover:bg-emerald-100/60 rounded-xl cursor-pointer transition border border-emerald-100 flex items-center justify-between">
+                                        <div>
+                                            <span className="text-[10px] font-bold text-brand-green uppercase tracking-wider">{res.type}</span>
+                                            <h5 className="text-xs font-bold text-brand-dark">{res.title}</h5>
+                                            <p className="text-[11px] text-gray-500 truncate max-w-md">{res.desc}</p>
+                                        </div>
+                                        <span className="text-xs text-brand-mint">→</span>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+
+            // Compute Search Results
+            const searchResults = useMemo(() => {
+                if (!searchQuery.trim()) return [];
+                const q = searchQuery.toLowerCase();
+                const res = [];
+
+                members.forEach(m => {
+                    if (m.name.toLowerCase().includes(q) || m.position.toLowerCase().includes(q)) {
+                        res.push({ type: 'Anggota', title: m.name, desc: m.position, tab: 'anggota' });
+                    }
+                });
+                programs.forEach(p => {
+                    if (p.title.toLowerCase().includes(q) || p.description.toLowerCase().includes(q)) {
+                        res.push({ type: 'Program Kerja', title: p.title, desc: p.category, tab: 'program' });
+                    }
+                });
+                news.forEach(n => {
+                    if (n.title.toLowerCase().includes(q) || n.summary.toLowerCase().includes(q)) {
+                        res.push({ type: 'Berita', title: n.title, desc: n.category, tab: 'berita' });
+                    }
+                });
+                documents.forEach(d => {
+                    if (d.title.toLowerCase().includes(q) || d.category.toLowerCase().includes(q)) {
+                        res.push({ type: 'Dokumen', title: d.title, desc: d.fileName, tab: 'dokumen' });
+                    }
+                });
+                return res;
+            }, [searchQuery, members, programs, news, documents]);
+
+            const navItems = [
+                { id: 'beranda', label: 'Beranda' },
+                { id: 'tentang', label: 'Tentang' },
+                { id: 'anggota', label: 'Anggota' },
+                { id: 'siklus', label: 'Siklus' },
+                { id: 'program', label: 'Program Kerja' },
+                { id: 'kegiatan', label: 'Kegiatan' },
+                { id: 'berita', label: 'Berita' },
+                { id: 'video', label: 'Video' },
+                { id: 'artikel', label: 'Artikel' },
+                { id: 'gallery', label: 'Gallery' },
+                { id: 'logbook', label: 'Logbook' },
+                { id: 'absensi', label: 'Absensi (35 Hari)' },
+                { id: 'dokumen', label: 'Dokumen' }
+            ];
+
+            return (
+                <div className="min-h-screen flex flex-col font-sans pb-16">
+                    {/* Toast Notification Banner */}
+                    {notification && (
+                        <div className={`fixed bottom-5 right-5 z-50 px-4 py-3 rounded-xl shadow-2xl text-xs font-bold flex items-center gap-2 border text-white ${
+                            notification.type === 'error' ? 'bg-red-600 border-red-700' : 'bg-brand-deep border-brand-green'
+                        }`}>
+                            <span>{notification.type === 'error' ? '⚠️' : '✅'}</span>
+                            <span>{notification.message}</span>
+                        </div>
+                    )}
+
+                    {/* Top Contributor Identity Bar */}
+                    <div className="bg-brand-dark text-emerald-100 text-xs py-2 px-4 flex flex-wrap justify-between items-center border-b border-brand-deep">
+                        <div className="flex items-center gap-2">
+                            <span className="w-2 h-2 rounded-full bg-brand-mint animate-pulse"></span>
+                            <span className="font-semibold text-white">KKN SISDAMAS UIN SGD BANDUNG 2026</span>
+                            <span className="hidden md:inline text-emerald-300/60">• Kelompok 224 Jayantara • Desa Mekarjaya, Cianjur</span>
+                        </div>
+                        <div className="flex items-center gap-3 mt-1 sm:mt-0">
+                            <div className="flex items-center gap-1.5 bg-brand-deep px-2.5 py-1 rounded-full border border-emerald-700/50">
+                                <span className="text-[10px] text-emerald-300">Kontributor:</span>
+                                <input
+                                    type="text"
+                                    value={contributorName}
+                                    onChange={(e) => setContributorName(e.target.value)}
+                                    className="bg-transparent font-bold text-white focus:outline-none w-20 text-xs"
+                                    title="Nama ini akan dicatat dalam histori revisi database"
+                                />
+                            </div>
+                            <button
+                                onClick={() => setIsSearchOpen(true)}
+                                className="bg-brand-green hover:bg-brand-mint text-white px-2.5 py-1 rounded-full text-[11px] font-bold transition flex items-center gap-1"
+                            >
+                                🔍 Cari Data
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Main Header & Navbar */}
+                    <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-emerald-100 shadow-sm">
+                        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+                            <div className="flex items-center gap-3 cursor-pointer" onClick={() => setActiveTab('beranda')}>
+                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-green to-brand-mint text-white flex items-center justify-center font-heading font-extrabold text-lg shadow-md border border-emerald-300">
+                                    224
+                                </div>
+                                <div>
+                                    <h1 className="font-heading font-bold text-brand-dark text-base sm:text-lg leading-tight">JAYANTARA 224</h1>
+                                    <p className="text-[11px] text-brand-green font-medium">KKN Mekarjaya Sukaluyu Cianjur</p>
+                                </div>
+                            </div>
+
+                            {/* + CONTRIBUTE QUICK ACTION BUTTON */}
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={() => setIsContributeOpen(true)}
+                                    className="bg-gradient-to-r from-brand-green to-brand-mint hover:from-brand-deep hover:to-brand-green text-white px-3.5 py-2 rounded-xl text-xs font-bold transition shadow-md flex items-center gap-1.5"
+                                >
+                                    <span className="text-base font-bold">+</span>
+                                    <span>CONTRIBUTE</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Horizontal Scrollable Menu Navigation */}
+                        <nav className="bg-emerald-50/70 border-t border-emerald-100/60 overflow-x-auto custom-scrollbar">
+                            <div className="max-w-7xl mx-auto px-4 flex gap-1 py-1.5 min-w-max">
+                                {navItems.map((nav) => (
+                                    <button
+                                        key={nav.id}
+                                        onClick={() => setActiveTab(nav.id)}
+                                        className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition whitespace-nowrap ${
+                                            activeTab === nav.id
+                                                ? 'bg-brand-green text-white shadow-sm'
+                                                : 'text-brand-dark hover:bg-emerald-100/70 hover:text-brand-green'
+                                        }`}
+                                    >
+                                        {nav.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </nav>
+                    </header>
+
+                    {/* Quick Contribute Floating Modal */}
+                    {isContributeOpen && (
+                        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+                            <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-emerald-100">
+                                <div className="flex justify-between items-center mb-4 pb-2 border-b">
+                                    <h3 className="font-heading font-bold text-brand-dark text-lg">🚀 Tambah Konten Baru ke Database</h3>
+                                    <button onClick={() => setIsContributeOpen(false)} className="text-gray-400 hover:text-red-500 font-bold">✕</button>
+                                </div>
+                                <div className="grid grid-cols-2 gap-2 text-xs">
+                                    <button onClick={() => { setEditingItem({ type: 'member', data: { name: '', position: '', division: '', bio: '', photo: '' } }); setIsContributeOpen(false); }} className="p-3 bg-emerald-50 hover:bg-emerald-100 text-brand-dark rounded-xl font-bold border border-emerald-200 text-left">
+                                        👤 Tambah Anggota
+                                    </button>
+                                    <button onClick={() => { setEditingItem({ type: 'cycle', data: { number: cycles.length + 1, title: '', description: '', date: '', location: '', output: '', cover: '' } }); setIsContributeOpen(false); }} className="p-3 bg-emerald-50 hover:bg-emerald-100 text-brand-dark rounded-xl font-bold border border-emerald-200 text-left">
+                                        🔄 Tambah Siklus
+                                    </button>
+                                    <button onClick={() => { setEditingItem({ type: 'program', data: { title: '', category: '', description: '', objective: '', target: '', date: '', location: '', result: '', cover: '' } }); setIsContributeOpen(false); }} className="p-3 bg-emerald-50 hover:bg-emerald-100 text-brand-dark rounded-xl font-bold border border-emerald-200 text-left">
+                                        📌 Tambah Program Kerja
+                                    </button>
+                                    <button onClick={() => { setEditingItem({ type: 'activity', data: { week: 1, title: '', date: '', location: '', description: '' } }); setIsContributeOpen(false); }} className="p-3 bg-emerald-50 hover:bg-emerald-100 text-brand-dark rounded-xl font-bold border border-emerald-200 text-left">
+                                        📅 Tambah Kegiatan
+                                    </button>
+                                    <button onClick={() => { setEditingItem({ type: 'news', data: { title: '', summary: '', description: '', source: contributorName, category: 'Umum', date: new Date().toISOString().split('T')[0], thumbnail: '' } }); setIsContributeOpen(false); }} className="p-3 bg-emerald-50 hover:bg-emerald-100 text-brand-dark rounded-xl font-bold border border-emerald-200 text-left">
+                                        📰 Tambah Berita
+                                    </button>
+                                    <button onClick={() => { setEditingItem({ type: 'video', data: { title: '', description: '', category: 'Dokumenter', videoUrl: '', videoType: 'youtube', date: new Date().toISOString().split('T')[0] } }); setIsContributeOpen(false); }} className="p-3 bg-emerald-50 hover:bg-emerald-100 text-brand-dark rounded-xl font-bold border border-emerald-200 text-left">
+                                        🎥 Tambah Video
+                                    </button>
+                                    <button onClick={() => { setEditingItem({ type: 'article', data: { title: '', author: contributorName, category: 'Jurnal', abstract: '', content: '', date: new Date().toISOString().split('T')[0] } }); setIsContributeOpen(false); }} className="p-3 bg-emerald-50 hover:bg-emerald-100 text-brand-dark rounded-xl font-bold border border-emerald-200 text-left">
+                                        ✍️ Tulis Artikel
+                                    </button>
+                                    <button onClick={() => { setEditingItem({ type: 'document', data: { title: '', category: 'Umum', fileName: '', fileUrl: '', uploadedBy: contributorName } }); setIsContributeOpen(false); }} className="p-3 bg-emerald-50 hover:bg-emerald-100 text-brand-dark rounded-xl font-bold border border-emerald-200 text-left">
+                                        📄 Upload Dokumen
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Search Modal */}
+                    {isSearchOpen && (
+                        <SearchModal
+                            onClose={() => setIsSearchOpen(false)}
+                            query={searchQuery}
+                            setQuery={setSearchQuery}
+                            results={searchResults}
+                        />
+                    )}
+
+                    {/* Dynamic Edit Modal for CRUD */}
+                    {editingItem && (
+                        <UniversalEditModal
+                            item={editingItem.data}
+                            type={editingItem.type}
+                            onClose={() => setEditingItem(null)}
+                            onSave={(savedData) => {
+                                const { type } = editingItem;
+                                logRevision(`Memperbarui data ${type}: ${savedData.title || savedData.name || 'Hero'}`);
+
+                                if (type === 'hero') {
+                                    setHeroContent(savedData);
+                                } else if (type === 'member') {
+                                    setMembers(prev => savedData.id ? prev.map(m => m.id === savedData.id ? savedData : m) : [...prev, { ...savedData, id: 'm_' + Date.now() }]);
+                                } else if (type === 'cycle') {
+                                    setCycles(prev => savedData.id ? prev.map(c => c.id === savedData.id ? savedData : c) : [...prev, { ...savedData, id: 'c_' + Date.now() }]);
+                                } else if (type === 'program') {
+                                    setPrograms(prev => savedData.id ? prev.map(p => p.id === savedData.id ? savedData : p) : [...prev, { ...savedData, id: 'p_' + Date.now() }]);
+                                } else if (type === 'activity') {
+                                    setActivities(prev => savedData.id ? prev.map(a => a.id === savedData.id ? savedData : a) : [...prev, { ...savedData, id: 'act_' + Date.now() }]);
+                                } else if (type === 'news') {
+                                    setNews(prev => savedData.id ? prev.map(n => n.id === savedData.id ? savedData : n) : [...prev, { ...savedData, id: 'n_' + Date.now() }]);
+                                } else if (type === 'video') {
+                                    setVideos(prev => savedData.id ? prev.map(v => v.id === savedData.id ? savedData : v) : [...prev, { ...savedData, id: 'v_' + Date.now() }]);
+                                } else if (type === 'article') {
+                                    setArticles(prev => savedData.id ? prev.map(a => a.id === savedData.id ? savedData : a) : [...prev, { ...savedData, id: 'a_' + Date.now() }]);
+                                } else if (type === 'document') {
+                                    setDocuments(prev => savedData.id ? prev.map(d => d.id === savedData.id ? savedData : d) : [...prev, { ...savedData, id: 'd_' + Date.now() }]);
+                                }
+                                showToast('Data berhasil disimpan!');
+                            }}
+                            onDelete={(id) => {
+                                const { type } = editingItem;
+                                logRevision(`Hapus data ${type} ID ${id}`);
+                                if (type === 'member') setMembers(prev => prev.filter(m => m.id !== id));
+                                if (type === 'cycle') setCycles(prev => prev.filter(c => c.id !== id));
+                                if (type === 'program') setPrograms(prev => prev.filter(p => p.id !== id));
+                                if (type === 'news') setNews(prev => prev.filter(n => n.id !== id));
+                                if (type === 'video') setVideos(prev => prev.filter(v => v.id !== id));
+                                if (type === 'article') setArticles(prev => prev.filter(a => a.id !== id));
+                                if (type === 'document') setDocuments(prev => prev.filter(d => d.id !== id));
+                                showToast('Data berhasil dihapus dari database.');
+                            }}
+                        />
+                    )}
+
+                    {/* MAIN CONTENT AREA BY TAB */}
+                    <main className="flex-1 max-w-7xl w-full mx-auto px-4 py-6">
+                        {/* 1. BERANDA */}
+                        {activeTab === 'beranda' && (
+                            <div className="space-y-12">
+                                {/* Editorial Hero Card */}
+                                <div className="relative rounded-3xl overflow-hidden bg-brand-dark text-white p-8 md:p-14 border border-emerald-900 shadow-2xl">
+                                    <div className="absolute inset-0 z-0 opacity-25 bg-cover bg-center" style={{ backgroundImage: `url(${heroContent.heroImage})` }}></div>
+                                    <div className="relative z-10 max-w-3xl space-y-4">
+                                        <div className="flex items-center gap-2">
+                                            <span className="badge-pill bg-brand-mint/20 text-brand-mint border border-brand-mint/30">KKN SISDAMAS 2026</span>
+                                            <button
+                                                onClick={() => setEditingItem({ type: 'hero', data: heroContent })}
+                                                className="bg-white/20 hover:bg-white/30 text-white px-3 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1"
+                                            >
+                                                ✏️ Edit Hero
+                                            </button>
+                                        </div>
+                                        <h2 className="text-3xl md:text-5xl font-heading font-extrabold tracking-tight leading-tight">{heroContent.heroTitle}</h2>
+                                        <p className="text-brand-mint text-sm md:text-base font-semibold">{heroContent.heroSubtitle}</p>
+                                        <p className="text-brand-peach italic font-serif text-lg md:text-xl">{heroContent.heroTheme}</p>
+                                        <p className="text-emerald-100/80 text-sm leading-relaxed">{heroContent.heroDescription}</p>
+
+                                        <div className="pt-4 flex flex-wrap gap-3">
+                                            <button onClick={() => setActiveTab('program')} className="bg-brand-mint hover:bg-brand-green text-brand-dark hover:text-white px-5 py-2.5 rounded-xl font-bold text-xs transition shadow-lg">
+                                                Lihat Program Kerja →
+                                            </button>
+                                            <button onClick={() => setActiveTab('absensi')} className="bg-white/10 hover:bg-white/20 text-white px-5 py-2.5 rounded-xl font-bold text-xs transition border border-white/20">
+                                                Absensi 35 Hari →
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Dynamic Database Statistics Cards */}
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                    <div className="bg-white p-5 rounded-2xl border border-emerald-100 shadow-sm text-center">
+                                        <div className="text-3xl font-heading font-extrabold text-brand-green">{stats.totalMembers}</div>
+                                        <div className="text-xs font-bold text-gray-500 uppercase tracking-wider mt-1">Anggota Kelompok</div>
+                                    </div>
+                                    <div className="bg-white p-5 rounded-2xl border border-emerald-100 shadow-sm text-center">
+                                        <div className="text-3xl font-heading font-extrabold text-brand-green">{stats.totalPrograms}</div>
+                                        <div className="text-xs font-bold text-gray-500 uppercase tracking-wider mt-1">Program Kerja</div>
+                                    </div>
+                                    <div className="bg-white p-5 rounded-2xl border border-emerald-100 shadow-sm text-center">
+                                        <div className="text-3xl font-heading font-extrabold text-brand-green">{stats.totalCycles}</div>
+                                        <div className="text-xs font-bold text-gray-500 uppercase tracking-wider mt-1">Siklus SISDAMAS</div>
+                                    </div>
+                                    <div className="bg-white p-5 rounded-2xl border border-emerald-100 shadow-sm text-center">
+                                        <div className="text-3xl font-heading font-extrabold text-brand-green">{stats.attendanceDays}</div>
+                                        <div className="text-xs font-bold text-gray-500 uppercase tracking-wider mt-1">Hari Pengabdian</div>
+                                    </div>
+                                </div>
+
+                                {/* Narrative Timeline Arc: WE ARRIVED -> WE WENT HOME */}
+                                <div className="bg-emerald-50/60 p-6 md:p-10 rounded-3xl border border-emerald-200">
+                                    <h3 className="text-xl font-heading font-bold text-brand-dark mb-6 text-center">📜 Alur Perjalanan Pengabdian (Narrative Arc)</h3>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-3 text-center">
+                                        {[
+                                            { label: 'WE ARRIVED', desc: 'Kedatangan di Desa Mekarjaya' },
+                                            { label: 'WE OBSERVED', desc: 'Sosialisasi & Transect Walk' },
+                                            { label: 'WE MAPPED', desc: 'Pemetaan Masalah Lingkungan' },
+                                            { label: 'WE GATHERED', desc: 'Rembug Warga & Karang Taruna' },
+                                            { label: 'WE BUILT', desc: 'Eksekusi Rocket Stove & Eco Print' },
+                                            { label: 'WE LEARNED', desc: 'Refleksi Nilai Ekotheologi' },
+                                            { label: 'WE WENT HOME', desc: 'Penutupan & Pamitan Desa' }
+                                        ].map((step, idx) => (
+                                            <div key={idx} className="bg-white p-3 rounded-xl border border-emerald-100 shadow-sm">
+                                                <div className="text-[10px] font-extrabold text-brand-mint uppercase">Langkah 0{idx+1}</div>
+                                                <div className="font-heading font-bold text-xs text-brand-dark my-1">{step.label}</div>
+                                                <div className="text-[10px] text-gray-500">{step.desc}</div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Final Narrative Closing Section */}
+                                <div className="bg-gradient-to-br from-brand-peach/40 to-brand-cream p-8 md:p-12 rounded-3xl border border-amber-200/80 text-center space-y-4">
+                                    <h3 className="font-serif italic text-2xl md:text-3xl font-bold text-brand-dark">{heroContent.closingTitle}</h3>
+                                    <p className="text-sm md:text-base text-gray-700 max-w-2xl mx-auto italic font-serif leading-relaxed">
+                                        "{heroContent.closingText}"
+                                    </p>
+                                    <button
+                                        onClick={() => setEditingItem({ type: 'hero', data: heroContent })}
+                                        className="inline-flex items-center gap-1.5 text-xs font-bold text-brand-green bg-white px-4 py-2 rounded-xl border shadow-sm hover:bg-emerald-50 transition"
+                                    >
+                                        ✏️ Edit Narasi Penutup
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* 2. TENTANG */}
+                        {activeTab === 'tentang' && (
+                            <div className="space-y-6">
+                                <div className="flex justify-between items-center border-b pb-4">
+                                    <div>
+                                        <h2 className="text-2xl font-heading font-bold text-brand-dark">Tentang KKN 224 Jayantara</h2>
+                                        <p className="text-xs text-gray-500">Profil lengkap lokasi pengabdian dan landasan filosofis ekotheologi.</p>
+                                    </div>
+                                </div>
+                                <div className="bg-white p-8 rounded-2xl border border-emerald-100 shadow-sm space-y-4 leading-relaxed text-sm text-gray-700">
+                                    <h3 className="text-lg font-heading font-bold text-brand-green">Membumikan Ekotheologi Berbasis Rahmatan Lil ‘Alamin</h3>
+                                    <p>
+                                        Kelompok KKN 224 Jayantara UIN Sunan Gunung Djati Bandung bertugas di Desa Mekarjaya, Kecamatan Sukaluyu, Kabupaten Cianjur pada tahun 2026. Pendekatan SISDAMAS (Sistem Pemberdayaan Masyarakat) yang kami gunakan memadukan antara potensi religiusitas lokal dengan kesadaran menjaga alam.
+                                    </p>
+                                    <p>
+                                        Melalui 4 siklus aksi terpadu, program kerja diselaraskan untuk memberikan manfaat berkelanjutan bagi warga perdesaan, mulai dari kompor hemat energi, fermentasi pupuk sampah dapur, hingga legalitas UMKM.
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* 3. ANGGOTA */}
+                        {activeTab === 'anggota' && (
+                            <div className="space-y-6">
+                                <div className="flex justify-between items-center border-b pb-4">
+                                    <div>
+                                        <h2 className="text-2xl font-heading font-bold text-brand-dark">Anggota Kelompok ({members.length})</h2>
+                                        <p className="text-xs text-gray-500">Seluruh anggota terhubung secara otomatis dengan tabel Absensi 35 Hari.</p>
+                                    </div>
+                                    <button
+                                        onClick={() => setEditingItem({ type: 'member', data: { name: '', position: '', division: '', bio: '', photo: '' } })}
+                                        className="bg-brand-green hover:bg-brand-deep text-white px-4 py-2 rounded-xl text-xs font-bold transition shadow-sm"
+                                    >
+                                        + Tambah Anggota
+                                    </button>
+                                </div>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                                    {members.map((m) => (
+                                        <div key={m.id} className="bg-white rounded-2xl border border-emerald-100 shadow-sm overflow-hidden hover:shadow-md transition">
+                                            <div className="h-56 bg-emerald-100 relative">
+                                                <img src={m.photo || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500&q=80'} alt={m.name} className="w-full h-full object-cover" />
+                                                <button
+                                                    onClick={() => setEditingItem({ type: 'member', data: m })}
+                                                    className="absolute top-3 right-3 bg-white/90 hover:bg-white text-brand-dark p-2 rounded-xl text-xs font-bold shadow-md transition"
+                                                >
+                                                    ✏️ Edit
+                                                </button>
+                                            </div>
+                                            <div className="p-5 space-y-2">
+                                                <span className="badge-pill bg-emerald-100 text-brand-green">{m.division || 'Anggota'}</span>
+                                                <h3 className="font-heading font-bold text-brand-dark text-base">{m.name}</h3>
+                                                <p className="text-xs font-semibold text-brand-mint">{m.position}</p>
+                                                <p className="text-xs text-gray-600">{m.bio}</p>
+                                                {m.social && <p className="text-[11px] font-mono text-emerald-600">IG: {m.social}</p>}
+                                                <UniversalAttachmentManager
+                                                    attachments={m.attachments || []}
+                                                    onUpdateAttachments={(newAtts) => {
+                                                        setMembers(prev => prev.map(item => item.id === m.id ? { ...item, attachments: newAtts } : item));
+                                                    }}
+                                                />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* 4. SIKLUS */}
+                        {activeTab === 'siklus' && (
+                            <div className="space-y-6">
+                                <div className="flex justify-between items-center border-b pb-4">
+                                    <div>
+                                        <h2 className="text-2xl font-heading font-bold text-brand-dark">4 Siklus SISDAMAS</h2>
+                                        <p className="text-xs text-gray-500">Tahapan metodologi pengabdian masyarakat berbasis partisipatif.</p>
+                                    </div>
+                                    <button
+                                        onClick={() => setEditingItem({ type: 'cycle', data: { number: cycles.length + 1, title: '', description: '', date: '', location: '', output: '', cover: '' } })}
+                                        className="bg-brand-green hover:bg-brand-deep text-white px-4 py-2 rounded-xl text-xs font-bold transition shadow-sm"
+                                    >
+                                        + Tambah Siklus
+                                    </button>
+                                </div>
+                                <div className="space-y-6">
+                                    {cycles.map((c) => (
+                                        <div key={c.id} className="bg-white rounded-2xl border border-emerald-100 shadow-sm p-6 flex flex-col md:flex-row gap-6 items-start">
+                                            {c.cover && (
+                                                <img src={c.cover} alt={c.title} className="w-full md:w-64 h-44 object-cover rounded-xl shrink-0" />
+                                            )}
+                                            <div className="space-y-2 flex-1">
+                                                <div className="flex justify-between items-center">
+                                                    <span className="badge-pill bg-brand-peach text-amber-900">SIKLUS 0{c.number}</span>
+                                                    <button onClick={() => setEditingItem({ type: 'cycle', data: c })} className="text-xs font-bold text-brand-green bg-emerald-50 px-3 py-1 rounded-lg hover:bg-emerald-100">✏️ Edit Siklus</button>
+                                                </div>
+                                                <h3 className="font-heading font-bold text-lg text-brand-dark">{c.title}</h3>
+                                                <p className="text-xs text-gray-500">📅 {c.date} • 📍 {c.location}</p>
+                                                <p className="text-xs text-gray-700 leading-relaxed">{c.description}</p>
+                                                {c.output && <div className="bg-emerald-50 p-2.5 rounded-xl border border-emerald-100 text-xs text-brand-deep font-semibold">📌 Output: {c.output}</div>}
+                                                <UniversalAttachmentManager
+                                                    attachments={c.attachments || []}
+                                                    onUpdateAttachments={(newAtts) => {
+                                                        setCycles(prev => prev.map(item => item.id === c.id ? { ...item, attachments: newAtts } : item));
+                                                    }}
+                                                />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* 5. PROGRAM KERJA */}
+                        {activeTab === 'program' && (
+                            <div className="space-y-6">
+                                <div className="flex justify-between items-center border-b pb-4">
+                                    <div>
+                                        <h2 className="text-2xl font-heading font-bold text-brand-dark">Program Kerja Unggulan</h2>
+                                        <p className="text-xs text-gray-500">Seluruh program kerja pendampingan ekotheologi Desa Mekarjaya.</p>
+                                    </div>
+                                    <button
+                                        onClick={() => setEditingItem({ type: 'program', data: { title: '', category: '', description: '', objective: '', target: '', date: '', location: '', result: '', cover: '' } })}
+                                        className="bg-brand-green hover:bg-brand-deep text-white px-4 py-2 rounded-xl text-xs font-bold transition shadow-sm"
+                                    >
+                                        + Tambah Program
+                                    </button>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {programs.map((p) => (
+                                        <div key={p.id} className="bg-white rounded-2xl border border-emerald-100 shadow-sm p-5 space-y-3 flex flex-col justify-between">
+                                            <div className="space-y-2">
+                                                {p.cover && <img src={p.cover} alt={p.title} className="w-full h-40 object-cover rounded-xl" />}
+                                                <div className="flex justify-between items-center">
+                                                    <span className="badge-pill bg-emerald-100 text-brand-green">{p.category}</span>
+                                                    <button onClick={() => setEditingItem({ type: 'program', data: p })} className="text-xs font-bold text-brand-green bg-emerald-50 px-2.5 py-1 rounded-lg hover:bg-emerald-100">✏️ Edit</button>
+                                                </div>
+                                                <h3 className="font-heading font-bold text-base text-brand-dark">{p.title}</h3>
+                                                <p className="text-xs text-gray-500">📍 {p.location} • 📅 {p.date}</p>
+                                                <p className="text-xs text-gray-700">{p.description}</p>
+                                                {p.result && <div className="bg-emerald-50/80 p-2.5 rounded-xl text-xs text-brand-deep font-medium border border-emerald-100">🎯 Hasil: {p.result}</div>}
+                                            </div>
+                                            <UniversalAttachmentManager
+                                                attachments={p.attachments || []}
+                                                onUpdateAttachments={(newAtts) => {
+                                                    setPrograms(prev => prev.map(item => item.id === p.id ? { ...item, attachments: newAtts } : item));
+                                                }}
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* 6. KEGIATAN MINGGUAN */}
+                        {activeTab === 'kegiatan' && (
+                            <div className="space-y-6">
+                                <div className="flex justify-between items-center border-b pb-4">
+                                    <div>
+                                        <h2 className="text-2xl font-heading font-bold text-brand-dark">Kegiatan Mingguan</h2>
+                                        <p className="text-xs text-gray-500">Agenda rutin dan mingguan mahasiswa KKN 224.</p>
+                                    </div>
+                                    <button
+                                        onClick={() => setEditingItem({ type: 'activity', data: { week: 1, title: '', date: '', location: '', description: '' } })}
+                                        className="bg-brand-green hover:bg-brand-deep text-white px-4 py-2 rounded-xl text-xs font-bold transition shadow-sm"
+                                    >
+                                        + Tambah Kegiatan
+                                    </button>
+                                </div>
+                                <div className="space-y-4">
+                                    {activities.map((act) => (
+                                        <div key={act.id} className="bg-white p-5 rounded-2xl border border-emerald-100 shadow-sm flex flex-col md:flex-row justify-between items-start gap-4">
+                                            <div className="space-y-1 flex-1">
+                                                <span className="badge-pill bg-brand-pink text-pink-900">Minggu 0{act.week}</span>
+                                                <h3 className="font-heading font-bold text-base text-brand-dark">{act.title}</h3>
+                                                <p className="text-xs text-gray-500">📅 {act.date} • 📍 {act.location}</p>
+                                                <p className="text-xs text-gray-700">{act.description}</p>
+                                                <UniversalAttachmentManager
+                                                    attachments={act.attachments || []}
+                                                    onUpdateAttachments={(newAtts) => {
+                                                        setActivities(prev => prev.map(item => item.id === act.id ? { ...item, attachments: newAtts } : item));
+                                                    }}
+                                                />
+                                            </div>
+                                            <button onClick={() => setEditingItem({ type: 'activity', data: act })} className="text-xs font-bold text-brand-green bg-emerald-50 px-3 py-1.5 rounded-xl hover:bg-emerald-100">✏️ Edit</button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* 7. BERITA */}
+                        {activeTab === 'berita' && (
+                            <div className="space-y-6">
+                                <div className="flex justify-between items-center border-b pb-4">
+                                    <div>
+                                        <h2 className="text-2xl font-heading font-bold text-brand-dark">Berita & Kabar Desa</h2>
+                                        <p className="text-xs text-gray-500">Publikasi warta pengabdian KKN 224 Jayantara.</p>
+                                    </div>
+                                    <button
+                                        onClick={() => setEditingItem({ type: 'news', data: { title: '', summary: '', description: '', source: contributorName, category: 'Umum', date: new Date().toISOString().split('T')[0], thumbnail: '' } })}
+                                        className="bg-brand-green hover:bg-brand-deep text-white px-4 py-2 rounded-xl text-xs font-bold transition shadow-sm"
+                                    >
+                                        + Tambah Berita
+                                    </button>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {news.map((n) => (
+                                        <div key={n.id} className="bg-white rounded-2xl border border-emerald-100 shadow-sm overflow-hidden flex flex-col justify-between">
+                                            <div>
+                                                {n.thumbnail && <img src={n.thumbnail} alt={n.title} className="w-full h-48 object-cover" />}
+                                                <div className="p-5 space-y-2">
+                                                    <div className="flex justify-between items-center">
+                                                        <span className="badge-pill bg-brand-peach text-amber-900">{n.category}</span>
+                                                        <button onClick={() => setEditingItem({ type: 'news', data: n })} className="text-xs font-bold text-brand-green bg-emerald-50 px-2 py-1 rounded">✏️ Edit</button>
+                                                    </div>
+                                                    <h3 className="font-heading font-bold text-base text-brand-dark">{n.title}</h3>
+                                                    <p className="text-xs text-gray-500">✍️ {n.source} • 📅 {n.date}</p>
+                                                    <p className="text-xs text-gray-700 leading-relaxed">{n.description}</p>
+                                                </div>
+                                            </div>
+                                            <div className="p-5 pt-0">
+                                                <UniversalAttachmentManager
+                                                    attachments={n.attachments || []}
+                                                    onUpdateAttachments={(newAtts) => {
+                                                        setNews(prev => prev.map(item => item.id === n.id ? { ...item, attachments: newAtts } : item));
+                                                    }}
+                                                />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* 8. VIDEO */}
+                        {activeTab === 'video' && (
+                            <div className="space-y-6">
+                                <div className="flex justify-between items-center border-b pb-4">
+                                    <div>
+                                        <h2 className="text-2xl font-heading font-bold text-brand-dark">Galeri Video & Dokumenter</h2>
+                                        <p className="text-xs text-gray-500">Mendukung YouTube Embed, TikTok, maupun Upload Video langsung.</p>
+                                    </div>
+                                    <button
+                                        onClick={() => setEditingItem({ type: 'video', data: { title: '', description: '', category: 'Dokumenter', videoUrl: '', videoType: 'youtube', date: new Date().toISOString().split('T')[0] } })}
+                                        className="bg-brand-green hover:bg-brand-deep text-white px-4 py-2 rounded-xl text-xs font-bold transition shadow-sm"
+                                    >
+                                        + Tambah Video
+                                    </button>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {videos.map((v) => (
+                                        <div key={v.id} className="bg-white rounded-2xl border border-emerald-100 shadow-sm overflow-hidden p-4 space-y-3">
+                                            <div className="aspect-video bg-black rounded-xl overflow-hidden">
+                                                {v.videoType === 'youtube' ? (
+                                                    <iframe src={v.videoUrl} className="w-full h-full" title={v.title} allowFullScreen></iframe>
+                                                ) : (
+                                                    <video src={v.videoUrl} controls className="w-full h-full object-cover"></video>
+                                                )}
+                                            </div>
+                                            <div className="flex justify-between items-start">
+                                                <div>
+                                                    <h3 className="font-heading font-bold text-base text-brand-dark">{v.title}</h3>
+                                                    <p className="text-xs text-gray-500">📅 {v.date} • {v.category}</p>
+                                                </div>
+                                                <button onClick={() => setEditingItem({ type: 'video', data: v })} className="text-xs font-bold text-brand-green bg-emerald-50 px-2.5 py-1 rounded">✏️ Edit</button>
+                                            </div>
+                                            <p className="text-xs text-gray-700">{v.description}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* 9. ARTIKEL */}
+                        {activeTab === 'artikel' && (
+                            <div className="space-y-6">
+                                <div className="flex justify-between items-center border-b pb-4">
+                                    <div>
+                                        <h2 className="text-2xl font-heading font-bold text-brand-dark">Artikel & Prosiding Ekotheologi</h2>
+                                        <p className="text-xs text-gray-500">Karya ilmiah dan naskah jurnal hasil pengabdian.</p>
+                                    </div>
+                                    <button
+                                        onClick={() => setEditingItem({ type: 'article', data: { title: '', author: contributorName, category: 'Jurnal', abstract: '', content: '', date: new Date().toISOString().split('T')[0] } })}
+                                        className="bg-brand-green hover:bg-brand-deep text-white px-4 py-2 rounded-xl text-xs font-bold transition shadow-sm"
+                                    >
+                                        ✍️ Tulis Artikel Baru
+                                    </button>
+                                </div>
+                                <div className="space-y-6">
+                                    {articles.map((art) => (
+                                        <div key={art.id} className="bg-white rounded-2xl border border-emerald-100 shadow-sm p-6 space-y-4">
+                                            <div className="flex justify-between items-start">
+                                                <div className="space-y-1">
+                                                    <span className="badge-pill bg-emerald-100 text-brand-green">{art.category}</span>
+                                                    <h3 className="font-heading font-bold text-xl text-brand-dark">{art.title}</h3>
+                                                    <p className="text-xs text-gray-500">✍️ {art.author} • 📅 {art.date}</p>
+                                                </div>
+                                                <button onClick={() => setEditingItem({ type: 'article', data: art })} className="text-xs font-bold text-brand-green bg-emerald-50 px-3 py-1.5 rounded-xl">✏️ Edit Artikel</button>
+                                            </div>
+                                            <div className="bg-emerald-50/50 p-4 rounded-xl border border-emerald-100 text-xs text-gray-700 italic">
+                                                <strong>Abstrak:</strong> {art.abstract}
+                                            </div>
+                                            <div className="text-xs text-gray-800 space-y-2 whitespace-pre-line leading-relaxed font-serif">
+                                                {art.content}
+                                            </div>
+                                            <UniversalAttachmentManager
+                                                attachments={art.attachments || []}
+                                                onUpdateAttachments={(newAtts) => {
+                                                    setArticles(prev => prev.map(item => item.id === art.id ? { ...item, attachments: newAtts } : item));
+                                                }}
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* 10. GALLERY */}
+                        {activeTab === 'gallery' && (
+                            <div className="space-y-6">
+                                <div className="flex justify-between items-center border-b pb-4">
+                                    <div>
+                                        <h2 className="text-2xl font-heading font-bold text-brand-dark">Galeri Dokumentasi Foto</h2>
+                                        <p className="text-xs text-gray-500">Unggah foto kegiatan dalam jumlah banyak (bulk drag & drop).</p>
+                                    </div>
+                                </div>
+
+                                <UniversalMediaUploader
+                                    label="Unggah Massal Foto Galeri"
+                                    onMediaAdded={(newMedia) => {
+                                        const newGal = {
+                                            id: 'g_' + Date.now(),
+                                            title: newMedia.title,
+                                            caption: 'Dokumentasi KKN 224',
+                                            category: 'Dokumentasi',
+                                            date: new Date().toISOString().split('T')[0],
+                                            location: 'Desa Mekarjaya',
+                                            url: newMedia.url,
+                                            mediaType: 'image'
+                                        };
+                                        setGallery(prev => [newGal, ...prev]);
+                                    }}
+                                />
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                                    {gallery.map((g) => (
+                                        <div key={g.id} className="bg-white rounded-2xl border border-emerald-100 shadow-sm overflow-hidden group relative">
+                                            <img src={g.url} alt={g.title} className="w-full h-52 object-cover" />
+                                            <div className="p-3">
+                                                <h4 className="font-heading font-bold text-xs text-brand-dark">{g.title}</h4>
+                                                <p className="text-[10px] text-gray-500">📍 {g.location} • 📅 {g.date}</p>
+                                            </div>
+                                            <button
+                                                onClick={() => {
+                                                    if (confirm('Hapus foto galeri ini?')) {
+                                                        setGallery(prev => prev.filter(item => item.id !== g.id));
+                                                        showToast('Foto berhasil dihapus.');
+                                                    }
+                                                }}
+                                                className="absolute top-2 right-2 bg-red-600 text-white p-1.5 rounded-lg text-xs opacity-0 group-hover:opacity-100 transition"
+                                            >
+                                                🗑️
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* 11. LOGBOOK */}
+                        {activeTab === 'logbook' && (
+                            <div className="space-y-6">
+                                <div className="flex justify-between items-center border-b pb-4">
+                                    <div>
+                                        <h2 className="text-2xl font-heading font-bold text-brand-dark">Logbook Harian Pengabdian</h2>
+                                        <p className="text-xs text-gray-500">Catatan aktivitas harian tim mahasiswa KKN 224.</p>
+                                    </div>
+                                    <button
+                                        onClick={() => {
+                                            const newLog = {
+                                                id: 'l_' + Date.now(),
+                                                day: logbook.length + 1,
+                                                date: new Date().toISOString().split('T')[0],
+                                                activity: 'Aktivitas Harian Baru',
+                                                location: 'Posko KKN 224',
+                                                description: 'Deskripsi kegiatan harian...'
+                                            };
+                                            setLogbook(prev => [...prev, newLog]);
+                                            showToast('Hari baru logbook ditambahkan!');
+                                        }}
+                                        className="bg-brand-green hover:bg-brand-deep text-white px-4 py-2 rounded-xl text-xs font-bold transition shadow-sm"
+                                    >
+                                        + Tambah Logbook Harian
+                                    </button>
+                                </div>
+                                <div className="space-y-4">
+                                    {logbook.map((lb) => (
+                                        <div key={lb.id} className="bg-white p-5 rounded-2xl border border-emerald-100 shadow-sm flex flex-col md:flex-row justify-between items-start gap-4">
+                                            <div className="space-y-1 flex-1">
+                                                <span className="badge-pill bg-brand-light text-brand-deep">HARI KE-{lb.day}</span>
+                                                <h3 className="font-heading font-bold text-base text-brand-dark">{lb.activity}</h3>
+                                                <p className="text-xs text-gray-500">📅 {lb.date} • 📍 {lb.location}</p>
+                                                <p className="text-xs text-gray-700">{lb.description}</p>
+                                                <UniversalAttachmentManager
+                                                    attachments={lb.attachments || []}
+                                                    onUpdateAttachments={(newAtts) => {
+                                                        setLogbook(prev => prev.map(item => item.id === lb.id ? { ...item, attachments: newAtts } : item));
+                                                    }}
+                                                />
+                                            </div>
+                                            <button
+                                                onClick={() => {
+                                                    const act = prompt('Edit Aktivitas Harian:', lb.activity);
+                                                    if (act) setLogbook(prev => prev.map(item => item.id === lb.id ? { ...item, activity: act } : item));
+                                                }}
+                                                className="text-xs font-bold text-brand-green bg-emerald-50 px-3 py-1.5 rounded-xl"
+                                            >
+                                                ✏️ Edit Log
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* 12. ABSENSI (EXACTLY 35 DAYS - SYNCED WITH MEMBERS) */}
+                        {activeTab === 'absensi' && (
+                            <div className="space-y-6">
+                                <div className="flex justify-between items-center border-b pb-4">
+                                    <div>
+                                        <h2 className="text-2xl font-heading font-bold text-brand-dark">Tabel Absensi Kehadiran (35 Hari)</h2>
+                                        <p className="text-xs text-gray-500">Otomatis terhubung dengan database Anggota. Klik status untuk mengubah (Hadir / Izin / Sakit / Alpa).</p>
+                                    </div>
+                                </div>
+
+                                {/* Dynamic Attendance Statistics Summary */}
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                    {(() => {
+                                        let totalHadir = 0, totalIzin = 0, totalSakit = 0, totalAlpa = 0;
+                                        let totalSlots = members.length * 35;
+                                        members.forEach(m => {
+                                            for (let d = 1; d <= 35; d++) {
+                                                const st = attendance[m.id]?.[`day_${d}`] || 'Hadir';
+                                                if (st === 'Hadir') totalHadir++;
+                                                if (st === 'Izin') totalIzin++;
+                                                if (st === 'Sakit') totalSakit++;
+                                                if (st === 'Alpa') totalAlpa++;
+                                            }
+                                        });
+                                        const pct = totalSlots > 0 ? ((totalHadir / totalSlots) * 100).toFixed(1) : 100;
+                                        return (
+                                            <>
+                                                <div className="bg-emerald-50 border border-emerald-200 p-3 rounded-xl text-center">
+                                                    <div className="text-xs text-brand-green font-bold uppercase">Tingkat Kehadiran</div>
+                                                    <div className="text-2xl font-heading font-extrabold text-brand-deep">{pct}%</div>
+                                                </div>
+                                                <div className="bg-blue-50 border border-blue-200 p-3 rounded-xl text-center">
+                                                    <div className="text-xs text-blue-800 font-bold uppercase">Total Hadir</div>
+                                                    <div className="text-2xl font-heading font-extrabold text-blue-900">{totalHadir}</div>
+                                                </div>
+                                                <div className="bg-amber-50 border border-amber-200 p-3 rounded-xl text-center">
+                                                    <div className="text-xs text-amber-800 font-bold uppercase">Izin / Sakit</div>
+                                                    <div className="text-2xl font-heading font-extrabold text-amber-900">{totalIzin + totalSakit}</div>
+                                                </div>
+                                                <div className="bg-red-50 border border-red-200 p-3 rounded-xl text-center">
+                                                    <div className="text-xs text-red-800 font-bold uppercase">Alpa</div>
+                                                    <div className="text-2xl font-heading font-extrabold text-red-900">{totalAlpa}</div>
+                                                </div>
+                                            </>
+                                        );
+                                    })()}
+                                </div>
+
+                                {/* Scrollable 35-Day Matrix Table */}
+                                <div className="bg-white rounded-2xl border border-emerald-100 shadow-sm overflow-x-auto custom-scrollbar">
+                                    <table className="w-full text-left text-xs border-collapse min-w-max">
+                                        <thead>
+                                            <tr className="bg-brand-dark text-white font-heading">
+                                                <th className="p-3 sticky left-0 bg-brand-dark z-10 border-r border-brand-deep">Nama Anggota</th>
+                                                <th className="p-3 text-center border-r border-brand-deep">Jabatan</th>
+                                                {Array.from({ length: 35 }, (_, i) => (
+                                                    <th key={i} className="p-2 text-center min-w-[40px] border-r border-brand-deep/50 text-[11px]">
+                                                        H{i+1}
+                                                    </th>
+                                                ))}
+                                                <th className="p-3 text-center">Total Hadir</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {members.map((m, idx) => {
+                                                let hCount = 0;
+                                                return (
+                                                    <tr key={m.id} className={idx % 2 === 0 ? 'bg-white' : 'bg-emerald-50/30'}>
+                                                        <td className="p-3 font-bold text-brand-dark sticky left-0 bg-white border-r border-emerald-100 shadow-sm">
+                                                            {m.name}
+                                                        </td>
+                                                        <td className="p-3 text-gray-500 border-r border-emerald-100">{m.position}</td>
+                                                        {Array.from({ length: 35 }, (_, i) => {
+                                                            const dayKey = `day_${i+1}`;
+                                                            const status = attendance[m.id]?.[dayKey] || 'Hadir';
+                                                            if (status === 'Hadir') hCount++;
+
+                                                            return (
+                                                                <td key={i} className="p-1 text-center border-r border-emerald-100/60">
+                                                                    <button
+                                                                        onClick={() => {
+                                                                            const statuses = ['Hadir', 'Izin', 'Sakit', 'Alpa'];
+                                                                            const nextStatus = statuses[(statuses.indexOf(status) + 1) % statuses.length];
+                                                                            setAttendance(prev => ({
+                                                                                ...prev,
+                                                                                [m.id]: {
+                                                                                    ...prev[m.id],
+                                                                                    [dayKey]: nextStatus
+                                                                                }
+                                                                            }));
+                                                                        }}
+                                                                        className={`w-7 h-7 rounded font-bold text-[10px] transition ${
+                                                                            status === 'Hadir' ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200' :
+                                                                            status === 'Izin' ? 'bg-amber-100 text-amber-800 hover:bg-amber-200' :
+                                                                            status === 'Sakit' ? 'bg-blue-100 text-blue-800 hover:bg-blue-200' :
+                                                                            'bg-red-100 text-red-800 hover:bg-red-200'
+                                                                        }`}
+                                                                        title={`Hari ke-${i+1}: ${status} (Klik untuk ubah)`}
+                                                                    >
+                                                                        {status[0]}
+                                                                    </button>
+                                                                </td>
+                                                            );
+                                                        })}
+                                                        <td className="p-3 text-center font-bold text-brand-green bg-emerald-50">
+                                                            {hCount} / 35
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            })}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* 13. DOKUMEN */}
+                        {activeTab === 'dokumen' && (
+                            <div className="space-y-6">
+                                <div className="flex justify-between items-center border-b pb-4">
+                                    <div>
+                                        <h2 className="text-2xl font-heading font-bold text-brand-dark">Arsip Dokumen Resmi (PDF, DOCX, XLSX, PPTX, CSV)</h2>
+                                        <p className="text-xs text-gray-500">Penyimpanan file terpusat lengkap dengan kontrol ganti file dan unduh.</p>
+                                    </div>
+                                </div>
+
+                                <UniversalMediaUploader
+                                    label="Upload Dokumen Resmi Baru"
+                                    onMediaAdded={(newMedia) => {
+                                        const newDoc = {
+                                            id: 'd_' + Date.now(),
+                                            title: newMedia.title,
+                                            description: 'Dokumen diunggah oleh ' + contributorName,
+                                            category: 'Arsip',
+                                            fileName: newMedia.title,
+                                            fileType: newMedia.fileType || 'application/pdf',
+                                            fileSize: newMedia.fileSize || '1.0 MB',
+                                            fileUrl: newMedia.url,
+                                            date: new Date().toISOString().split('T')[0],
+                                            uploadedBy: contributorName
+                                        };
+                                        setDocuments(prev => [newDoc, ...prev]);
+                                    }}
+                                />
+
+                                <div className="space-y-3">
+                                    {documents.map((docItem) => (
+                                        <div key={docItem.id} className="bg-white p-4 rounded-2xl border border-emerald-100 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-10 h-10 rounded-xl bg-emerald-100 text-brand-green flex items-center justify-center font-bold text-lg">
+                                                    📄
+                                                </div>
+                                                <div>
+                                                    <h4 className="font-heading font-bold text-sm text-brand-dark">{docItem.title}</h4>
+                                                    <p className="text-xs text-gray-500">{docItem.fileName} • {docItem.fileSize} • Diunggah: {docItem.uploadedBy}</p>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex items-center gap-2">
+                                                <a
+                                                    href={docItem.fileUrl}
+                                                    target="_blank"
+                                                    rel="noreferrer"
+                                                    className="bg-brand-green hover:bg-brand-deep text-white px-3 py-1.5 rounded-xl text-xs font-bold transition"
+                                                >
+                                                    ⬇️ Unduh / Buka
+                                                </a>
+                                                <button
+                                                    onClick={() => setEditingItem({ type: 'document', data: docItem })}
+                                                    className="bg-emerald-50 hover:bg-emerald-100 text-brand-green px-3 py-1.5 rounded-xl text-xs font-bold transition"
+                                                >
+                                                    ✏️ Edit & Ganti
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </main>
+
+                    {/* Footer */}
+                    <footer className="bg-brand-dark text-white border-t border-brand-deep py-8 px-4 mt-auto">
+                        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-emerald-200/70">
+                            <div>
+                                <h4 className="font-heading font-bold text-white text-base">KKN 224 JAYANTARA (2026)</h4>
+                                <p>Desa Mekarjaya, Kecamatan Sukaluyu, Kabupaten Cianjur • UIN SGD Bandung</p>
+                            </div>
+                            <div className="text-center md:text-right">
+                                <p className="italic font-serif">“This isn't just where our report lives. This is where our story continues.”</p>
+                                <p className="mt-1 text-[10px] text-emerald-400">Database & Media Storage Engine Active • Real-time Editable</p>
+                            </div>
+                        </div>
+                    </footer>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
